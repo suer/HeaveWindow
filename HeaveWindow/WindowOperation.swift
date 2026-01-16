@@ -6,9 +6,13 @@ class WindowOperation {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private var currentWindow: AXUIElement?
-    
+    private var highlightWindow: HighlightWindow?
+    private var workspaceObserver: NSObjectProtocol?
+
     init() {
         setupEventTap()
+        highlightWindow = HighlightWindow()
+        setupWorkspaceObserver()
     }
     
     private func setupEventTap() {
@@ -61,7 +65,12 @@ class WindowOperation {
         if isInMoveMode {
             currentWindow = getActiveWindow()
             NSSound.beep()
+
+            if let window = currentWindow {
+                highlightWindow?.highlight(window: window)
+            }
         } else {
+            highlightWindow?.hide()
             currentWindow = nil
         }
     }
@@ -118,12 +127,36 @@ class WindowOperation {
         
         if let newPosition = AXValueCreate(.cgPoint, &point) {
             AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, newPosition)
+            highlightWindow?.highlight(window: window) 
         }
     }
     
+    private func setupWorkspaceObserver() {
+        workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleAppSwitch()
+        }
+    }
+
+    private func handleAppSwitch() {
+        // モード中にアプリが切り替わったら、モードを終了
+        if isInMoveMode {
+            print("App switched, exiting move mode")
+            isInMoveMode = false
+            highlightWindow?.hide()
+            currentWindow = nil
+        }
+    }
+
     deinit {
         if let eventTap = eventTap {
             CGEvent.tapEnable(tap: eventTap, enable: false)
+        }
+        if let observer = workspaceObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
         }
     }
 }
