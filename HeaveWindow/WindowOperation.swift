@@ -80,7 +80,7 @@ class WindowOperation {
         let isShiftPressed = flags.contains(.maskShift)
 
         switch keyCode {
-        case 53: // ESC
+        case 53, 36: // ESC, Enter
             toggleMoveMode()
             return nil
         case 126, 40: // Up, k
