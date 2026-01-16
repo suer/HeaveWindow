@@ -83,28 +83,28 @@ class WindowOperation {
         case 53: // ESC
             toggleMoveMode()
             return nil
-        case 126: // Up
+        case 126, 40: // Up, k
             if isShiftPressed {
                 resizeWindow(dw: 0, dh: -20)
             } else {
                 moveWindow(dx: 0, dy: -20)
             }
             return nil
-        case 125: // Down
+        case 125, 38: // Down, j
             if isShiftPressed {
                 resizeWindow(dw: 0, dh: 20)
             } else {
                 moveWindow(dx: 0, dy: 20)
             }
             return nil
-        case 123: // Left
+        case 123, 4: // Left, h
             if isShiftPressed {
                 resizeWindow(dw: -20, dh: 0)
             } else {
                 moveWindow(dx: -20, dy: 0)
             }
             return nil
-        case 124: // Right
+        case 124, 37: // Right, l
             if isShiftPressed {
                 resizeWindow(dw: 20, dh: 0)
             } else {
