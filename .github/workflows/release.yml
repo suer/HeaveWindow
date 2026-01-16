@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Import signing certificate
+        env:
+          CERTIFICATES_P12: ${{ secrets.CERTIFICATES_P12 }}
+          CERTIFICATES_P12_PASSWORD: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
+        run: |
+          echo "$CERTIFICATES_P12" | base64 --decode > certificate.p12
+          security create-keychain -p actions temp.keychain
+          security default-keychain -s temp.keychain
+          security unlock-keychain -p actions temp.keychain
+          security import certificate.p12 -k temp.keychain -P "$CERTIFICATES_P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k actions temp.keychain
+
+      - name: Configure code signing for release
+        run: |
+          sed -i '' "s/DEVELOPMENT_TEAM = \"\";/DEVELOPMENT_TEAM = $TEAM_ID;/" HeaveWindow.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/' HeaveWindow.xcodeproj/project.pbxproj
+          perl -i -pe 's/(CODE_SIGN_STYLE = Manual;)/$1\n\t\t\t\tCODE_SIGN_IDENTITY = "Developer ID Application";/' HeaveWindow.xcodeproj/project.pbxproj
+        env:
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+
+      - name: Build and Archive
+        run: |
+          xcodebuild -project HeaveWindow.xcodeproj -scheme HeaveWindow -configuration Release -archivePath ./build/HeaveWindow.xcarchive archive
+
+      - name: Export Archive
+        run: |
+          sed -i '' "s/YOUR_TEAM_ID/$TEAM_ID/g" ExportOptions.plist
+          xcodebuild -exportArchive -archivePath ./build/HeaveWindow.xcarchive -exportPath ./build -exportOptionsPlist ExportOptions.plist
+        env:
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+
+      - name: Notarize
+        run: |
+          ditto -c -k --keepParent ./build/HeaveWindow.app ./build/HeaveWindow.zip
+          xcrun notarytool submit ./build/HeaveWindow.zip --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --wait
+          xcrun stapler staple ./build/HeaveWindow.app
+        env:
+          APPLE_ID: ${{ secrets.NOTARIZATION_APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+
+      - name: Create distribution ZIP
+        run: |
+          cd ./build
+          ditto -c -k --keepParent HeaveWindow.app HeaveWindow-${{ github.ref_name }}.zip
+
+      - name: Create Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        with:
+          files: ./build/HeaveWindow-${{ github.ref_name }}.zip
+          draft: false
+          prerelease: false
