@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		80B600582F1B1A0D00885BD4 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 80B600572F1B1A0D00885BD4 /* Sparkle */; };
+		80C700212F1B2A0E00885BD4 /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 80C700202F1B2A0E00885BD4 /* Yams */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				80B600582F1B1A0D00885BD4 /* Sparkle in Frameworks */,
+				80C700212F1B2A0E00885BD4 /* Yams in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +86,7 @@
 			name = HeaveWindow;
 			packageProductDependencies = (
 				80B600572F1B1A0D00885BD4 /* Sparkle */,
+				80C700202F1B2A0E00885BD4 /* Yams */,
 			);
 			productName = HeaveWindow;
 			productReference = 80FA391A2F1A752700741C31 /* HeaveWindow.app */;
@@ -115,6 +118,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				80B600562F1B1A0D00885BD4 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				80C7001F2F1B2A0E00885BD4 /* XCRemoteSwiftPackageReference "Yams" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 80FA391B2F1A752700741C31 /* Products */;
@@ -391,6 +395,14 @@
 				minimumVersion = 2.8.1;
 			};
 		};
+		80C7001F2F1B2A0E00885BD4 /* XCRemoteSwiftPackageReference "Yams" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jpsim/Yams";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -398,6 +410,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 80B600562F1B1A0D00885BD4 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
+		};
+		80C700202F1B2A0E00885BD4 /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 80C7001F2F1B2A0E00885BD4 /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

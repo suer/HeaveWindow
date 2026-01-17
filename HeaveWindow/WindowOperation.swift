@@ -8,8 +8,10 @@ class WindowOperation {
     private var currentWindow: AXUIElement?
     private var highlightWindow: HighlightWindow?
     private var workspaceObserver: NSObjectProtocol?
+    private let hotkey: ParsedHotkey
 
     init() {
+        hotkey = ParsedHotkey.from(config: Config.shared.hotkeyConfig)
         setupEventTap()
         highlightWindow = HighlightWindow()
         setupWorkspaceObserver()
@@ -47,7 +49,7 @@ class WindowOperation {
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         let flags = event.flags
 
-        if keyCode == 49 && flags.contains([.maskAlternate, .maskShift]) { // Alt+Shift+Space
+        if keyCode == hotkey.keyCode && flags.contains(hotkey.modifierFlags) {
             toggleMoveMode()
             return nil
         }
