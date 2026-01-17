@@ -66,7 +66,6 @@ class WindowOperation {
 
         if isInMoveMode {
             currentWindow = getActiveWindow()
-            NSSound.beep()
 
             if let window = currentWindow {
                 highlightWindow?.highlight(window: window)
