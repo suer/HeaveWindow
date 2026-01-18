@@ -8,6 +8,7 @@ class WindowOperation {
     private var currentWindow: AXUIElement?
     private var highlightWindow: HighlightWindow?
     private var workspaceObserver: NSObjectProtocol?
+    private var windowObserver: AXObserver?
     private let hotkey: ParsedHotkey
 
     init() {
@@ -69,9 +70,11 @@ class WindowOperation {
 
             if let window = currentWindow {
                 highlightWindow?.highlight(window: window)
+                startObservingWindow(window)
             }
         } else {
             highlightWindow?.hide()
+            stopObservingWindow()
             currentWindow = nil
         }
     }
@@ -149,7 +152,6 @@ class WindowOperation {
 
         if let newPosition = AXValueCreate(.cgPoint, &point) {
             AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, newPosition)
-            highlightWindow?.highlight(window: window)
         }
     }
 
@@ -170,7 +172,6 @@ class WindowOperation {
 
         if let newSize = AXValueCreate(.cgSize, &currentSize) {
             AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, newSize)
-            highlightWindow?.highlight(window: window)
         }
     }
 
@@ -189,14 +190,51 @@ class WindowOperation {
             print("App switched, exiting move mode")
             isInMoveMode = false
             highlightWindow?.hide()
+            stopObservingWindow()
             currentWindow = nil
         }
+    }
+
+    private func startObservingWindow(_ window: AXUIElement) {
+        guard let app = NSWorkspace.shared.frontmostApplication else { return }
+        let pid = app.processIdentifier
+
+        var observer: AXObserver?
+        let result = AXObserverCreate(pid, { (_, element, _, refcon) in
+            guard let refcon = refcon else { return }
+            let operation = Unmanaged<WindowOperation>.fromOpaque(refcon).takeUnretainedValue()
+            DispatchQueue.main.async {
+                operation.highlightWindow?.highlight(window: element)
+            }
+        }, &observer)
+
+        guard result == .success, let observer = observer else { return }
+
+        self.windowObserver = observer
+
+        AXObserverAddNotification(observer, window, kAXMovedNotification as CFString,
+                                  Unmanaged.passUnretained(self).toOpaque())
+        AXObserverAddNotification(observer, window, kAXResizedNotification as CFString,
+                                  Unmanaged.passUnretained(self).toOpaque())
+
+        CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
+    }
+
+    private func stopObservingWindow() {
+        guard let observer = windowObserver, let window = currentWindow else { return }
+
+        AXObserverRemoveNotification(observer, window, kAXMovedNotification as CFString)
+        AXObserverRemoveNotification(observer, window, kAXResizedNotification as CFString)
+        CFRunLoopRemoveSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
+
+        windowObserver = nil
     }
 
     deinit {
         if let eventTap = eventTap {
             CGEvent.tapEnable(tap: eventTap, enable: false)
         }
+        stopObservingWindow()
         if let observer = workspaceObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(observer)
         }
