@@ -40,7 +40,7 @@ private let keyCodeMap: [String: Int] = [
     "f1": 122, "f2": 120, "f3": 99, "f4": 118, "f5": 96, "f6": 97,
     "f7": 98, "f8": 100, "f9": 101, "f10": 109, "f11": 103, "f12": 111,
     "escape": 53, "return": 36, "tab": 48, "delete": 51,
-    "up": 126, "down": 125, "left": 123, "right": 124,
+    "up": 126, "down": 125, "left": 123, "right": 124
 ]
 
 private let modifierMap: [String: CGEventFlags] = [
@@ -50,5 +50,5 @@ private let modifierMap: [String: CGEventFlags] = [
     "cmd": .maskCommand,
     "control": .maskControl,
     "ctrl": .maskControl,
-    "shift": .maskShift,
+    "shift": .maskShift
 ]
