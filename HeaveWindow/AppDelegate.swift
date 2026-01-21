@@ -29,6 +29,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem(title: "About HeaveWindow", action: #selector(showAboutPanel), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
+        if #available(macOS 13.0, *) {
+            let launchAtLoginItem = NSMenuItem(
+                title: "Launch at Login",
+                action: #selector(toggleLaunchAtLogin),
+                keyEquivalent: ""
+            )
+            launchAtLoginItem.state = LaunchAtLogin.isEnabled ? .on : .off
+            menu.addItem(launchAtLoginItem)
+        }
+        menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         statusItem?.menu = menu
 
@@ -46,6 +56,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func showAboutPanel() {
         NSApplication.shared.activate(ignoringOtherApps: true)
         NSApplication.shared.orderFrontStandardAboutPanel(nil)
+    }
+
+    @available(macOS 13.0, *)
+    @objc func toggleLaunchAtLogin(_ sender: NSMenuItem) {
+        LaunchAtLogin.toggle()
+        sender.state = LaunchAtLogin.isEnabled ? .on : .off
     }
 
     func setupWithAccessibilityCheck() {
