@@ -33,7 +33,8 @@ class Config {
 
     func reload() {
         guard FileManager.default.fileExists(atPath: configPath),
-              let yamlString = try? String(contentsOfFile: configPath, encoding: .utf8) else {
+            let yamlString = try? String(contentsOfFile: configPath, encoding: .utf8)
+        else {
             appConfig = nil
             return
         }

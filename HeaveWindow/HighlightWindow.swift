@@ -37,8 +37,11 @@ class HighlightWindow: NSWindow {
         var positionValue: AnyObject?
         var sizeValue: AnyObject?
 
-        guard AXUIElementCopyAttributeValue(window, kAXPositionAttribute as CFString, &positionValue) == .success,
-              AXUIElementCopyAttributeValue(window, kAXSizeAttribute as CFString, &sizeValue) == .success else {
+        guard
+            AXUIElementCopyAttributeValue(window, kAXPositionAttribute as CFString, &positionValue)
+                == .success,
+            AXUIElementCopyAttributeValue(window, kAXSizeAttribute as CFString, &sizeValue) == .success
+        else {
             return nil
         }
 

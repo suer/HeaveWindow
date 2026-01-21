@@ -1,5 +1,5 @@
-import Cocoa
 import Carbon
+import Cocoa
 
 class WindowOperation {
     private var isInMoveMode = false
@@ -21,18 +21,20 @@ class WindowOperation {
     private func setupEventTap() {
         let eventMask = (1 << CGEventType.keyDown.rawValue)
 
-        guard let eventTap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .defaultTap,
-            eventsOfInterest: CGEventMask(eventMask),
-            callback: { (proxy, type, event, refcon) -> Unmanaged<CGEvent>? in
-                guard let refcon = refcon else { return Unmanaged.passUnretained(event) }
-                let mover = Unmanaged<WindowOperation>.fromOpaque(refcon).takeUnretainedValue()
-                return mover.handleEvent(proxy: proxy, type: type, event: event)
-            },
-            userInfo: Unmanaged.passUnretained(self).toOpaque()
-        ) else {
+        guard
+            let eventTap = CGEvent.tapCreate(
+                tap: .cgSessionEventTap,
+                place: .headInsertEventTap,
+                options: .defaultTap,
+                eventsOfInterest: CGEventMask(eventMask),
+                callback: { (proxy, type, event, refcon) -> Unmanaged<CGEvent>? in
+                    guard let refcon = refcon else { return Unmanaged.passUnretained(event) }
+                    let mover = Unmanaged<WindowOperation>.fromOpaque(refcon).takeUnretainedValue()
+                    return mover.handleEvent(proxy: proxy, type: type, event: event)
+                },
+                userInfo: Unmanaged.passUnretained(self).toOpaque()
+            )
+        else {
             return
         }
 
@@ -42,7 +44,9 @@ class WindowOperation {
         CGEvent.tapEnable(tap: eventTap, enable: true)
     }
 
-    private func handleEvent(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
+    private func handleEvent(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent) -> Unmanaged<
+        CGEvent
+    >? {
         guard type == .keyDown else {
             return Unmanaged.passUnretained(event)
         }
@@ -84,31 +88,31 @@ class WindowOperation {
         let isShiftPressed = flags.contains(.maskShift)
 
         switch keyCode {
-        case 53, 36: // ESC, Enter
+        case 53, 36:  // ESC, Enter
             toggleMoveMode()
             return nil
-        case 126, 40: // Up, k
+        case 126, 40:  // Up, k
             if isShiftPressed {
                 resizeWindow(deltaWidth: 0, deltaHeight: -20)
             } else {
                 moveWindow(deltaX: 0, deltaY: -20)
             }
             return nil
-        case 125, 38: // Down, j
+        case 125, 38:  // Down, j
             if isShiftPressed {
                 resizeWindow(deltaWidth: 0, deltaHeight: 20)
             } else {
                 moveWindow(deltaX: 0, deltaY: 20)
             }
             return nil
-        case 123, 4: // Left, h
+        case 123, 4:  // Left, h
             if isShiftPressed {
                 resizeWindow(deltaWidth: -20, deltaHeight: 0)
             } else {
                 moveWindow(deltaX: -20, deltaY: 0)
             }
             return nil
-        case 124, 37: // Right, l
+        case 124, 37:  // Right, l
             if isShiftPressed {
                 resizeWindow(deltaWidth: 20, deltaHeight: 0)
             } else {
@@ -125,7 +129,8 @@ class WindowOperation {
         let appRef = AXUIElementCreateApplication(app.processIdentifier)
 
         var value: AnyObject?
-        let result = AXUIElementCopyAttributeValue(appRef, kAXFocusedWindowAttribute as CFString, &value)
+        let result = AXUIElementCopyAttributeValue(
+            appRef, kAXFocusedWindowAttribute as CFString, &value)
 
         if result == .success {
             // swiftlint:disable:next force_cast
@@ -139,7 +144,8 @@ class WindowOperation {
         guard let window = currentWindow else { return }
 
         var positionValue: AnyObject?
-        let result = AXUIElementCopyAttributeValue(window, kAXPositionAttribute as CFString, &positionValue)
+        let result = AXUIElementCopyAttributeValue(
+            window, kAXPositionAttribute as CFString, &positionValue)
 
         guard result == .success, let position = positionValue else { return }
 
@@ -200,22 +206,26 @@ class WindowOperation {
         let pid = app.processIdentifier
 
         var observer: AXObserver?
-        let result = AXObserverCreate(pid, { (_, element, _, refcon) in
-            guard let refcon = refcon else { return }
-            let operation = Unmanaged<WindowOperation>.fromOpaque(refcon).takeUnretainedValue()
-            DispatchQueue.main.async {
-                operation.highlightWindow?.highlight(window: element)
-            }
-        }, &observer)
+        let result = AXObserverCreate(
+            pid,
+            { (_, element, _, refcon) in
+                guard let refcon = refcon else { return }
+                let operation = Unmanaged<WindowOperation>.fromOpaque(refcon).takeUnretainedValue()
+                DispatchQueue.main.async {
+                    operation.highlightWindow?.highlight(window: element)
+                }
+            }, &observer)
 
         guard result == .success, let observer = observer else { return }
 
         self.windowObserver = observer
 
-        AXObserverAddNotification(observer, window, kAXMovedNotification as CFString,
-                                  Unmanaged.passUnretained(self).toOpaque())
-        AXObserverAddNotification(observer, window, kAXResizedNotification as CFString,
-                                  Unmanaged.passUnretained(self).toOpaque())
+        AXObserverAddNotification(
+            observer, window, kAXMovedNotification as CFString,
+            Unmanaged.passUnretained(self).toOpaque())
+        AXObserverAddNotification(
+            observer, window, kAXResizedNotification as CFString,
+            Unmanaged.passUnretained(self).toOpaque())
 
         CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
     }

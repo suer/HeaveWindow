@@ -1,6 +1,6 @@
 import Cocoa
-import SwiftUI
 import Sparkle
+import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
@@ -26,8 +26,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.action = #selector(statusBarButtonClicked)
         }
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "About HeaveWindow", action: #selector(showAboutPanel), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: ""))
+        menu.addItem(
+            NSMenuItem(title: "About HeaveWindow", action: #selector(showAboutPanel), keyEquivalent: ""))
+        menu.addItem(
+            NSMenuItem(
+                title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
         if #available(macOS 13.0, *) {
             let launchAtLoginItem = NSMenuItem(
@@ -39,7 +42,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             menu.addItem(launchAtLoginItem)
         }
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(
+            NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         statusItem?.menu = menu
 
         setupWithAccessibilityCheck()
