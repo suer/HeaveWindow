@@ -47,6 +47,12 @@ jobs:
         env:
           TEAM_ID: ${{ secrets.TEAM_ID }}
 
+      - name: Set Build Number
+        run: |
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" HeaveWindow.xcodeproj/project.pbxproj
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+
       - name: Build and Archive
         run: |
           xcodebuild -project HeaveWindow.xcodeproj -scheme HeaveWindow -configuration Release -archivePath ./build/HeaveWindow.xcarchive archive
