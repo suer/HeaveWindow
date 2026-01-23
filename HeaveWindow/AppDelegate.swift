@@ -41,6 +41,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             launchAtLoginItem.state = LaunchAtLogin.isEnabled ? .on : .off
             menu.addItem(launchAtLoginItem)
         }
+        menu.addItem(
+            NSMenuItem(
+                title: "Settings...", action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(
             NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
@@ -66,6 +69,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func toggleLaunchAtLogin(_ sender: NSMenuItem) {
         LaunchAtLogin.toggle()
         sender.state = LaunchAtLogin.isEnabled ? .on : .off
+    }
+
+    @objc func openSettings() {
+        if Config.shared.createDefaultConfigIfNeeded() {
+            let configURL = URL(fileURLWithPath: Config.shared.configPath)
+            NSWorkspace.shared.open(configURL)
+        }
     }
 
     func setupWithAccessibilityCheck() {

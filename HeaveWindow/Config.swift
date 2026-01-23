@@ -21,8 +21,16 @@ struct AppConfig: Decodable {
 class Config {
     static let shared = Config()
 
-    private let configPath: String
+    let configPath: String
     private(set) var appConfig: AppConfig?
+
+    static let defaultConfigContent = """
+        hotkey:
+          modifiers:
+            - option
+            - shift
+          key: space
+        """
 
     var hotkeyConfig: HotkeyConfig {
         appConfig?.hotkey ?? HotkeyConfig.default
@@ -48,6 +56,25 @@ class Config {
         } catch {
             logger.error("Failed to parse config: \(error)")
             appConfig = nil
+        }
+    }
+
+    func createDefaultConfigIfNeeded() -> Bool {
+        if FileManager.default.fileExists(atPath: configPath) {
+            return true
+        }
+
+        let configDir = (configPath as NSString).deletingLastPathComponent
+        do {
+            try FileManager.default.createDirectory(
+                atPath: configDir, withIntermediateDirectories: true, attributes: nil)
+            try Config.defaultConfigContent.write(
+                toFile: configPath, atomically: true, encoding: .utf8)
+            reload()
+            return true
+        } catch {
+            logger.error("Failed to create default config: \(error)")
+            return false
         }
     }
 }
