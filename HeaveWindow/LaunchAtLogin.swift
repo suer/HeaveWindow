@@ -1,4 +1,7 @@
 import ServiceManagement
+import os
+
+private let logger = Logger(subsystem: "com.heavewindow.HeaveWindow", category: "LaunchAtLogin")
 
 @available(macOS 13.0, *)
 enum LaunchAtLogin {
@@ -14,7 +17,7 @@ enum LaunchAtLogin {
                 try SMAppService.mainApp.register()
             }
         } catch {
-            print("Failed to toggle launch at login: \(error)")
+            logger.error("Failed to toggle launch at login: \(error)")
         }
     }
 }

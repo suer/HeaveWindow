@@ -1,5 +1,8 @@
 import Foundation
 import Yams
+import os
+
+private let logger = Logger(subsystem: "com.heavewindow.HeaveWindow", category: "Config")
 
 struct HotkeyConfig: Decodable {
     let modifiers: [String]
@@ -41,8 +44,9 @@ class Config {
 
         do {
             appConfig = try YAMLDecoder().decode(AppConfig.self, from: yamlString)
+            logger.error("config: \(yamlString)")
         } catch {
-            print("Failed to parse config: \(error)")
+            logger.error("Failed to parse config: \(error)")
             appConfig = nil
         }
     }

@@ -193,7 +193,6 @@ class WindowOperation {
 
     private func handleAppSwitch() {
         if isInMoveMode {
-            print("App switched, exiting move mode")
             isInMoveMode = false
             highlightWindow?.hide()
             stopObservingWindow()
